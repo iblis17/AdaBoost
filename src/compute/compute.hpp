@@ -3,10 +3,6 @@
 #include <iostream>
 #include <fstream>
 
-#define ROW 10
-#define COL 100
-#define MSIZE ROW*COL
-
 
 class Compute
 {
