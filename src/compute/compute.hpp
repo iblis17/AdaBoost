@@ -16,7 +16,7 @@ public:
 	// Context
 	cl::Context context;
 	// Buffer
-	std::vector< cl::Buffer::Buffer* > buffers;
+	std::vector< cl::Buffer* > buffers;
 	size_t shape;
 	// Program
 	cl::Program program;
@@ -30,8 +30,6 @@ public:
 	Compute(size_t shape)
 		: shape(shape)
 	{
-		cl_int err;
-
 		// Platform
 		this->init_platform();
 
@@ -76,7 +74,7 @@ public:
 	{
 		cl_int err;
 
-		cl::Buffer *buf = new cl::Buffer::Buffer(
+		cl::Buffer *buf = new cl::Buffer(
 			this->context,
 			buffs,
 			buffs + this->shape,
@@ -87,7 +85,7 @@ public:
 
 		this->buffers.push_back(buf);
 
-		check_err(err, "cl::Buffer::Buffer");
+		check_err(err, "cl::Buffer constructor");
 
 		// set kernel argument
 		err = this->kernel.setArg(this->buffers.size() - 1, *buf);

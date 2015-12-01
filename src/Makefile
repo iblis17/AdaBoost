@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS = -std=c++11 -lOpenCL -g
+CFLAGS = -std=c++11 -lOpenCL -g -Wall
 
 
 all: build_dir Add
