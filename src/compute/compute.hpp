@@ -4,6 +4,10 @@
 #include <fstream>
 
 
+#ifndef COMPUTE_HPP  // include guard
+#define COMPUTE_HPP
+
+
 class Compute
 {
 public:
@@ -187,3 +191,7 @@ private:
 		check_err(err, "cl::CommandQueue::CommandQueue");
 	}
 };
+
+#endif /* end of include guard: COMPUTE_HPP */
+
+#include "kernel.hpp"
