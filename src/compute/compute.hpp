@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 
+#ifndef DEBUG
+#define DEBUG false
+#endif
 
 #ifndef COMPUTE_HPP  // include guard
 #define COMPUTE_HPP
@@ -21,18 +24,18 @@ public:
 	cl::Context context;
 	// Buffer
 	std::vector< cl::Buffer* > buffers;
-	size_t shape;
 	// Program
 	cl::Program program;
 	const static std::string kernel_src;
 	// Kernel
 	cl::Kernel kernel;
+	std::string kernel_name;
 	// CommandQueue
 	cl::CommandQueue command_queue;
 
 
-	Compute(size_t shape)
-		: shape(shape)
+	Compute(std::string name)
+		: kernel_name(name)
 	{
 		// Platform
 		this->init_platform();
@@ -59,13 +62,22 @@ public:
 			delete i;
 	}
 
-	void add()
+	void run(const int dm1, const int dm2=0, const int dm3=0)
 	{
+		cl::NDRange global_range;
+
+		if (dm3 != 0)
+			global_range = cl::NDRange(dm1, dm2, dm3);
+		else if (dm2 !=0)
+			global_range = cl::NDRange(dm1, dm2);
+		else
+			global_range = cl::NDRange(dm1);
+
 		cl::Event event;
 		this->command_queue.enqueueNDRangeKernel(
 			this->kernel,
 			cl::NullRange,  // offset
-			cl::NDRange(this->shape),  // global
+			global_range,  // global
 			cl::NullRange,  // local
 			NULL,  // events
 			&event  // event
@@ -73,7 +85,9 @@ public:
 		event.wait();
 	}
 
-	void set_buffer(float *buffs,
+	template<typename T>
+	void set_buffer(T *buffs,
+					const int shape,
 					cl_mem_flags flags=CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR)
 	{
 		cl_int err;
@@ -81,7 +95,7 @@ public:
 		cl::Buffer *buf = new cl::Buffer(
 			this->context,
 			buffs,
-			buffs + this->shape,
+			buffs + shape,
 			true,  // readonly
 			true,  // usehostptr
 			&err
@@ -92,13 +106,19 @@ public:
 		check_err(err, "cl::Buffer constructor");
 
 		// set kernel argument
+		if (DEBUG)
+		{
+			std::cout << "[DEBUG] cl::Kernel::setArg "
+					  << this->buffers.size() - 1 << std::endl;
+		}
 		err = this->kernel.setArg(this->buffers.size() - 1, *buf);
 		check_err(err, "cl::Kernel::Kernel");
 	}
 
-	void set_ret_buffer(float * buffs)
+	template<typename T>
+	void set_ret_buffer(T *buffs, const int shape)
 	{
-		this->set_buffer(buffs, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR);
+		this->set_buffer(buffs, shape, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR);
 	}
 
 private:
@@ -164,18 +184,21 @@ private:
 			&err);
 
 		// debug
-		std::string tmps;
-		program.getBuildInfo(this->device, CL_PROGRAM_BUILD_LOG, &tmps);
-		std::cout << "Build log ==========================" << std::endl;
-		std::cout << tmps << std::endl;
-		std::cout << "End of build log ===================" << std::endl;
-		check_err(err, "cl::Program::Program");
+		if (DEBUG)
+		{
+			std::string tmps;
+			program.getBuildInfo(this->device, CL_PROGRAM_BUILD_LOG, &tmps);
+			std::cout << "Build log ==========================" << std::endl;
+			std::cout << tmps << std::endl;
+			std::cout << "End of build log ===================" << std::endl;
+			check_err(err, "cl::Program::Program");
+		}
 	}
 
 	void init_kernel()
 	{
 		cl_int err;
-		this->kernel = cl::Kernel::Kernel(program, "add", &err);
+		this->kernel = cl::Kernel::Kernel(program, this->kernel_name.c_str(), &err);
 
 		check_err(err, "cl::Kernel::Kernel");
 	}
