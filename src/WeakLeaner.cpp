@@ -22,7 +22,7 @@ int main()
     int nf_shape[2] = { 1, 6 };
     float ret[1][3];
 
-    Compute c("WeakLearn");
+    Compute c("WeakLearn", CL_DEVICE_TYPE_CPU);
 
     c.set_buffer((float *)pf, 1 * 4);
     c.set_buffer((float *)nf, 1 * 6);
