@@ -56,7 +56,7 @@ kernel void WeakLearn(
 
     for (int i=1; i<slice; ++i)
     {
-        float theta1 = (max_ - min_) * i / (slice - 1);
+        float theta1 = (max_ - min_) * i / (slice - 1) + min_;
         float error1 = 0;
         float polarity1 = 1;
         /*

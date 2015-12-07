@@ -166,11 +166,11 @@ class Compute
             cl_int err;
 
             this->context = cl::Context::Context(devices,
-                    NULL,  // property
-                    NULL,  // call back
-                    NULL,  // user_data
-                    &err
-                    );
+                NULL,  // property
+                NULL,  // call back
+                NULL,  // user_data
+                &err
+                );
             check_err(err, "cl::Context::Context");
         }
 
