@@ -20,10 +20,16 @@ class Compute
         // Device
         std::vector< cl::Device > devices;
         cl::Device device;
+        int cl_device_type;
+        cl_mem_flags cl_mem_extra_flags;
+        bool cl_buffer_hostptr;
         // Context
         cl::Context context;
         // Buffer
         std::vector< cl::Buffer* > buffers;
+        cl::Buffer *ret_buffer;
+        size_t ret_buffer_size;
+        void *ret_obj;
         // Program
         cl::Program program;
         const static std::string kernel_src;
@@ -34,8 +40,8 @@ class Compute
         cl::CommandQueue command_queue;
 
 
-        Compute(std::string name)
-            : kernel_name(name)
+        Compute(std::string name, int device_type=CL_DEVICE_TYPE_CPU)
+            : cl_device_type(device_type), kernel_name(name)
         {
             // Platform
             this->init_platform();
@@ -83,21 +89,35 @@ class Compute
                 &event  // event
                 );
             event.wait();
+
+            // read result
+            this->command_queue.enqueueReadBuffer(
+                *this->ret_buffer,
+                true,  // block read
+                0,  // offset
+                this->ret_buffer_size,
+                this->ret_obj,
+                NULL,  // events
+                &event
+                );
         }
 
         template<typename T>
         void set_buffer(T *buffs,
             const int shape,
-            cl_mem_flags flags=CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR)
+            cl_mem_flags flags=CL_MEM_READ_ONLY,
+            cl::Buffer **ret=NULL)
         {
             cl_int err;
+
+            flags |= this->cl_mem_extra_flags;
 
             cl::Buffer *buf = new cl::Buffer(
                 this->context,
                 buffs,
                 buffs + shape,
-                true,  // readonly
-                true,  // usehostptr
+                false,  // readonly
+                this->cl_buffer_hostptr,  // usehostptr
                 &err
                 );
 
@@ -113,12 +133,24 @@ class Compute
             }
             err = this->kernel.setArg(this->buffers.size() - 1, *buf);
             check_err(err, "cl::Kernel::Kernel");
+
+            if (ret == NULL)
+                return;
+
+            *ret = buf;
         }
 
         template<typename T>
         void set_ret_buffer(T *buffs, const int shape)
         {
-            this->set_buffer(buffs, shape, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR);
+            this->set_buffer(
+                buffs,
+                shape,
+                CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                &this->ret_buffer
+                );
+            this->ret_buffer_size = sizeof(T) * shape;
+            this->ret_obj = buffs;
         }
 
     private:
@@ -147,7 +179,23 @@ class Compute
 
         void init_device()
         {
-            platform.getDevices(CL_DEVICE_TYPE_CPU, &this->devices);
+            if (this->cl_device_type == CL_DEVICE_TYPE_CPU)
+            {
+                this->cl_mem_extra_flags = CL_MEM_USE_HOST_PTR;
+                this->cl_buffer_hostptr = true;
+            }
+            else if (this->cl_device_type == CL_DEVICE_TYPE_GPU)
+            {
+                this->cl_mem_extra_flags = CL_MEM_COPY_HOST_PTR;
+                this->cl_buffer_hostptr = false;
+            }
+            else
+            {
+                std::cout << "Wrong CL Device Type!" << std::endl;
+                exit(1);
+            }
+
+            platform.getDevices(this->cl_device_type, &this->devices);
             this->check_err(devices.size()? CL_SUCCESS : -1, "cl:Platform::getDevices");
 
             this->device = this->devices[0];
@@ -178,10 +226,10 @@ class Compute
         {
             cl_int err;
             this->program = cl::Program::Program(
-                    context,
-                    this->kernel_src,
-                    true,  // build
-                    &err);
+                context,
+                this->kernel_src,
+                true,  // build
+                &err);
 
             // debug
             if (DEBUG)
