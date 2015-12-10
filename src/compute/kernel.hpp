@@ -29,9 +29,7 @@ kernel void WeakLearn(
     const int nf_col = *(nf_shape + 1);
 
     global float *pf = pf_maxtrix + row * pf_col;
-    global float *pw = pf_weight  + row * pf_col;
     global float *nf = nf_maxtrix + row * nf_col;
-    global float *nw = nf_weight  + row * nf_col;
     global float *ret = ret_matrix + row * 3;
 
     float max_ = *pf;
@@ -69,11 +67,11 @@ kernel void WeakLearn(
 
         for (int j=0; j<pf_col; ++j)
             if (*(pf + j) < theta1)
-                error1 += pw[j];
+                error1 += pf_weight[j];
 
         for (int j=0; j<nf_col; ++j)
             if (*(nf + j) > theta1)
-                error1 += nw[j];
+                error1 += nf_weight[j];
 
         if (error1 > 0.5)
         {
