@@ -114,10 +114,9 @@ class Compute
 
             cl::Buffer *buf = new cl::Buffer(
                 this->context,
-                buffs,
-                buffs + shape,
-                false,  // readonly
-                this->cl_buffer_hostptr,  // usehostptr
+                flags,
+                sizeof(T) * shape,
+                (void *)buffs,
                 &err
                 );
 
