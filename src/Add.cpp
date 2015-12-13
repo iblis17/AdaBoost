@@ -11,9 +11,9 @@ int main()
 	float ret[4];
 	Compute c("add", CL_DEVICE_TYPE_CPU);
 
-	c.set_buffer(test, 4);
-	c.set_buffer(test2, 4);
-	c.set_ret_buffer(ret, 4);
+	c.set_buffer(test, 4 * sizeof(float));
+	c.set_buffer(test2, 4 * sizeof(float));
+	c.set_ret_buffer(ret, 4 * sizeof(float));
 	c.run(4);
 
 	for(auto &i: ret)

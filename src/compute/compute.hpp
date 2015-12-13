@@ -102,11 +102,10 @@ class Compute
                 );
         }
 
-        template<typename T>
-        void set_buffer(T *buffs,
-            const int shape,
-            cl_mem_flags flags=CL_MEM_READ_ONLY,
-            cl::Buffer **ret=NULL)
+        void set_buffer(void *buffs,
+                        const size_t size,  // size in bytes
+                        cl_mem_flags flags=CL_MEM_READ_ONLY,
+                        cl::Buffer **ret=NULL)
         {
             cl_int err;
 
@@ -115,8 +114,8 @@ class Compute
             cl::Buffer *buf = new cl::Buffer(
                 this->context,
                 flags,
-                sizeof(T) * shape,
-                (void *)buffs,
+                size,
+                buffs,
                 &err
                 );
 
@@ -139,16 +138,15 @@ class Compute
             *ret = buf;
         }
 
-        template<typename T>
-        void set_ret_buffer(T *buffs, const int shape)
+        void set_ret_buffer(void *buffs, const size_t size)
         {
             this->set_buffer(
                 buffs,
-                shape,
-                CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                size,
+                CL_MEM_WRITE_ONLY,
                 &this->ret_buffer
                 );
-            this->ret_buffer_size = sizeof(T) * shape;
+            this->ret_buffer_size = size;
             this->ret_obj = buffs;
         }
 

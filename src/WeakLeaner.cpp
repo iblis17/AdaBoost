@@ -24,16 +24,16 @@ int main()
 
     Compute c("WeakLearn", CL_DEVICE_TYPE_CPU);
 
-    c.set_buffer((float *)pf, 1 * 4);
-    c.set_buffer((float *)nf, 1 * 6);
+    c.set_buffer((float *)pf, 1 * 4 * sizeof(float));
+    c.set_buffer((float *)nf, 1 * 6 * sizeof(float));
 
-    c.set_buffer((float *)pw, 1 * 4);
-    c.set_buffer((float *)nw, 1 * 6);
+    c.set_buffer((float *)pw, 1 * 4 * sizeof(float));
+    c.set_buffer((float *)nw, 1 * 6 * sizeof(float));
 
-    c.set_buffer((int *)pf_shape, 2);
-    c.set_buffer((int *)nf_shape, 2);
+    c.set_buffer((int *)pf_shape, 2 * sizeof(float));
+    c.set_buffer((int *)nf_shape, 2 * sizeof(float));
 
-    c.set_ret_buffer((float *)ret, 1 * 3);
+    c.set_ret_buffer((float *)ret, 1 * 3 * sizeof(float));
 
     c.run(1, 4);
 
