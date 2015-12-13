@@ -30,8 +30,8 @@ int main()
     c.set_buffer((float *)pw, 1 * 4 * sizeof(float));
     c.set_buffer((float *)nw, 1 * 6 * sizeof(float));
 
-    c.set_buffer((int *)pf_shape, 2 * sizeof(float));
-    c.set_buffer((int *)nf_shape, 2 * sizeof(float));
+    c.set_buffer((int *)pf_shape, 2 * sizeof(int));
+    c.set_buffer((int *)nf_shape, 2 * sizeof(int));
 
     c.set_ret_buffer((float *)ret, 1 * 3 * sizeof(float));
 
