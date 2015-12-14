@@ -40,4 +40,6 @@ int main()
     std::cout << ret[0][0] << std::endl;
     std::cout << ret[0][1] << std::endl;
     std::cout << ret[0][2] << std::endl;
+
+    c.reset_buffer();  // obj `c` can reuse for next `set_buffer` and `run`
 }

@@ -1,5 +1,6 @@
 #include <CL/cl.hpp>
 
+#include <cassert>
 #include <iostream>
 #include <fstream>
 
@@ -64,8 +65,7 @@ class Compute
 
         ~Compute()
         {
-            for(auto &i: this->buffers)
-                delete i;
+            this->reset_buffer();
         }
 
         void run(const int dm1, const int dm2=0, const int dm3=0)
@@ -91,6 +91,8 @@ class Compute
             event.wait();
 
             // read result
+            assert(this->ret_buffer != NULL);
+            assert(this->ret_buffer_size != 0);
             this->command_queue.enqueueReadBuffer(
                 *this->ret_buffer,
                 true,  // block read
@@ -148,6 +150,18 @@ class Compute
                 );
             this->ret_buffer_size = size;
             this->ret_obj = buffs;
+        }
+
+        void reset_buffer()
+        {
+            /* Release all cl buffer objs in vector `this->buffers`
+             * Also, reset `ret_buffer` relatived vars.
+             * */
+
+            this->ret_buffer = NULL;
+            this->buffers.clear();
+            this->ret_obj = NULL;
+            this->ret_buffer_size = 0;
         }
 
     private:
