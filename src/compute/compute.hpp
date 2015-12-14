@@ -159,9 +159,12 @@ class Compute
              * */
 
             this->ret_buffer = NULL;
-            this->buffers.clear();
             this->ret_obj = NULL;
             this->ret_buffer_size = 0;
+
+            for (auto &i: this->buffers)
+                delete i;
+            this->buffers.clear();
         }
 
     private:
