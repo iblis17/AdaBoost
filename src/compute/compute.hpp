@@ -232,12 +232,33 @@ class Compute
             if (DEBUG)
             {
                 std::string tmps;
-                program.getBuildInfo(this->device, CL_PROGRAM_BUILD_LOG, &tmps);
+                this->program.getBuildInfo(this->device, CL_PROGRAM_BUILD_LOG, &tmps);
                 std::cout << "[cl::Program] Build log ==========================" << std::endl;
                 std::cout << tmps << std::endl;
                 std::cout << "[cl::Program] End of build log ===================" << std::endl;
                 check_err(err, "cl::Program::Program");
             }
+        }
+
+        void save_binary_kernel(std::string path)
+        {
+            std::vector<char *> tmp_v;
+            std::vector<size_t> tmp_size;
+            std::ofstream f(path, std::ios::out | std::ios::binary);
+
+            this->program.getInfo(CL_PROGRAM_BINARY_SIZES, &tmp_size);
+            tmp_v.push_back(new char[tmp_size[0]]);
+
+            this->program.getInfo(CL_PROGRAM_BINARIES, &tmp_v);
+            std::cout << "[cl::Program] binaries: "
+                      << tmp_v.size() << ", "
+                      << "size: " << tmp_size[0]
+                      << std::endl;
+
+            f.write(tmp_v[0], tmp_size[0]);
+
+            tmp_v.clear();
+            f.close();
         }
 
         void init_kernel()
