@@ -129,7 +129,9 @@ class Compute
             if (DEBUG)
             {
                 std::cout << "[DEBUG] cl::Kernel::setArg "
-                          << this->buffers.size() - 1 << std::endl;
+                          << this->buffers.size() - 1 << ": "
+                          << buf
+                          << std::endl;
             }
             err = this->kernel.setArg(this->buffers.size() - 1, *buf);
             check_err(err, "cl::Kernel::Kernel");
@@ -165,6 +167,14 @@ class Compute
             for (auto &i: this->buffers)
                 delete i;
             this->buffers.clear();
+        }
+
+        void reset_buffer(const size_t index)
+        {
+            assert(index < this->buffers.size());
+
+            delete this->buffers[index];
+            this->buffers[index] = NULL;
         }
 
     private:
