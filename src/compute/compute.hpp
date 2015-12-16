@@ -65,6 +65,7 @@ class Compute
 
         ~Compute()
         {
+            this->sync();
             this->reset_buffer();
         }
 
@@ -204,13 +205,21 @@ class Compute
             this->check_err(error, "CommandQueue::enqueueWriteBuffer");
         }
 
-
         void release_buffer(const size_t index)
         {
             assert(index < this->buffers.size());
 
             delete this->buffers[index];
             this->buffers[index] = NULL;
+        }
+
+        void sync()
+        {
+            cl_int error;
+
+            error = this->command_queue.finish();
+            this->check_err(error,
+                            "CommandQueue::finish CL_OUT_OF_HOST_MEMORY");
         }
 
     private:
