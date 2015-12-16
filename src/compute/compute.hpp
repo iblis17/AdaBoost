@@ -169,7 +169,43 @@ class Compute
             this->buffers.clear();
         }
 
-        void reset_buffer(const size_t index)
+        void reset_buffer(const size_t index, void *buffs)
+        {
+            /* Reuse the this->buffer[index]
+             *
+             * The size of `buffs` should be same as this->buffers[index].
+             * */
+            assert(index < this->buffers.size());
+            assert(this->buffers[index] != NULL);
+
+            size_t size;
+            cl::Event event;
+            cl_int error;
+
+            this->buffers[index]->getInfo(CL_MEM_SIZE, &size);
+            if (DEBUG)
+            {
+                std::cout << "[reset_buffer] Size of buffers"
+                          << "[" << index << "]: "
+                          << size << std::endl;
+            }
+
+            error = this->command_queue.enqueueWriteBuffer(
+                *(this->buffers[index]),
+                CL_TRUE,  // blocking
+                0,  // offset
+                size,
+                buffs,
+                NULL,  // events
+                &event
+                );
+            event.wait();
+
+            this->check_err(error, "CommandQueue::enqueueWriteBuffer");
+        }
+
+
+        void release_buffer(const size_t index)
         {
             assert(index < this->buffers.size());
 
