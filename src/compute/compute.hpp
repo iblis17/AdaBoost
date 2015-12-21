@@ -61,6 +61,11 @@ class Compute
 
             // Command Queue
             this->init_command_queue();
+
+            if (DEBUG)
+            {
+                this->clinfo();
+            }
         }
 
         ~Compute()
@@ -220,6 +225,15 @@ class Compute
             error = this->command_queue.finish();
             this->check_err(error,
                             "CommandQueue::finish CL_OUT_OF_HOST_MEMORY");
+        }
+
+        void clinfo()
+        {
+            size_t out;
+
+            this->device.getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &out);
+            std::cout << "Device Max Compute Units: "
+                      << out << std::endl;
         }
 
     private:
