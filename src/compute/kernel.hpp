@@ -28,17 +28,17 @@ kernel void WeakLearn(
     const int pf_col = *(pf_shape + 1);
     const int nf_col = *(nf_shape + 1);
 
-    global float private read_only *pf = pf_maxtrix + row * pf_col;
-    global float private read_only *nf = nf_maxtrix + row * nf_col;
-    global float private read_only *ret = ret_matrix + row * 3;
+    global float read_only *pf = pf_maxtrix + row * pf_col;
+    global float read_only *nf = nf_maxtrix + row * nf_col;
+    global float read_only *ret = ret_matrix + row * 3;
 
-    private float max_ = *pf;
-    private float min_ = max_;
-    private read_only int slice = 10;
+    float max_ = *pf;
+    float min_ = max_;
+    read_only int slice = 10;
 
-    private float error = 1;
-    private float theta = 0;
-    private float polarity = 1;
+    float error = 1;
+    float theta = 0;
+    float polarity = 1;
 
     // find the max/min from (pf + nf)
     for (int i=1; i<pf_col; ++i)
@@ -54,9 +54,9 @@ kernel void WeakLearn(
 
     for (int i=1; i<slice; ++i)
     {
-        private float theta1 = (max_ - min_) * i / (slice - 1) + min_;
-        private float error1 = 0;
-        private float polarity1 = 1;
+        float theta1 = (max_ - min_) * i / (slice - 1) + min_;
+        float error1 = 0;
+        float polarity1 = 1;
         /*
          *   negative data  |  positive data
          *                  |
