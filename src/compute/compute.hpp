@@ -37,7 +37,7 @@ class Compute
         // Kernel
         cl::Kernel kernel;
         std::string kernel_name;
-        size_t kernel_arg_idx;
+        cl_uint kernel_arg_idx;
         // CommandQueue
         cl::CommandQueue command_queue;
 
@@ -151,7 +151,7 @@ class Compute
         }
 
         template<typename T>
-        void set_buffer(const T &val)
+        void set_buffer(const T val)
         {
             cl_int err;
 
@@ -162,8 +162,8 @@ class Compute
             if (DEBUG)
             {
                 std::cout << "[DEBUG] cl::Kernel::setArg "
-                          << this->kernel_arg_idx << ": "
-                          << "const setted"
+                          << this->kernel_arg_idx - 1 << ": "
+                          << val
                           << std::endl;
             }
         }

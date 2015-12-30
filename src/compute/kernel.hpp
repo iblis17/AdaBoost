@@ -24,14 +24,14 @@ kernel void WeakLearn(
      * :param ret_matrix:
      *      feature_size x 3 (error, polarity, theta)
      * */
-    const int row_start = get_global_id(0);
+    const int row_start = get_global_id(0) * group_size;
 
     const int pf_col = *(pf_shape + 1);
     const int nf_col = *(nf_shape + 1);
 
     const int row_end = row_start + group_size;
 
-    for(int row=row_start; row<row_end; row++)
+    for(int row=row_start; row<row_end; ++row)
     {
         global float *pf = pf_maxtrix + row * pf_col;
         global float *nf = nf_maxtrix + row * nf_col;
