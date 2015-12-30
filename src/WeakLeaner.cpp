@@ -6,40 +6,50 @@
 
 int main()
 {
-    float pf[1][4] = {
-        {50, 20, 84, 30}
+    float pf[2][4] = {
+        {50, 20, 84, 30},
+        {30, 50, 24, 11}
     };
-    float pw[1][4] = {
+    float pw[2][4] = {
+        {0.1, 0.1, 0.1, 0.1},
         {0.1, 0.1, 0.1, 0.1}
     };
-    float nf[1][6] = {
-        {42, 80, 104, 5, 70, 65}
+    float nf[2][6] = {
+        {42, 80, 104, 5, 70, 65},
+        {31, 25, 34, 91, 22, 15}
     };
-    float nw[1][6] = {
+    float nw[2][6] = {
+        {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
         {0.1, 0.1, 0.1, 0.1, 0.1, 0.1}
     };
-    int pf_shape[2] = { 1, 4 };
-    int nf_shape[2] = { 1, 6 };
-    float ret[1][3];
+    int pf_shape[2] = { 2, 4 };
+    int nf_shape[2] = { 2, 6 };
+    int group_size = 2;
+    float ret[2][3];
 
     Compute c("WeakLearn", CL_DEVICE_TYPE_CPU);
 
-    c.set_buffer((float *)pf, 1 * 4 * sizeof(float));
-    c.set_buffer((float *)nf, 1 * 6 * sizeof(float));
+    c.set_buffer((float *)pf, 2 * 4 * sizeof(float));
+    c.set_buffer((float *)nf, 2 * 6 * sizeof(float));
 
-    c.set_buffer((float *)pw, 1 * 4 * sizeof(float));
-    c.set_buffer((float *)nw, 1 * 6 * sizeof(float));
+    c.set_buffer((float *)pw, 2 * 4 * sizeof(float));
+    c.set_buffer((float *)nw, 2 * 6 * sizeof(float));
 
     c.set_buffer((int *)pf_shape, 2 * sizeof(int));
     c.set_buffer((int *)nf_shape, 2 * sizeof(int));
 
-    c.set_ret_buffer((float *)ret, 1 * 3 * sizeof(float));
+    c.set_buffer(group_size);
 
-    c.run(1, 4);
+    c.set_ret_buffer((float *)ret, 2 * 3 * sizeof(float));
+
+    c.run(1);
 
     std::cout << ret[0][0] << std::endl;
     std::cout << ret[0][1] << std::endl;
     std::cout << ret[0][2] << std::endl;
+    std::cout << ret[1][0] << std::endl;
+    std::cout << ret[1][1] << std::endl;
+    std::cout << ret[1][2] << std::endl;
 
     c.reset_buffer();  // obj `c` can reuse for next `set_buffer` and `run`
 }

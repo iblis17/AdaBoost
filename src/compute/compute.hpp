@@ -37,6 +37,7 @@ class Compute
         // Kernel
         cl::Kernel kernel;
         std::string kernel_name;
+        size_t kernel_arg_idx;
         // CommandQueue
         cl::CommandQueue command_queue;
 
@@ -135,17 +136,36 @@ class Compute
             if (DEBUG)
             {
                 std::cout << "[DEBUG] cl::Kernel::setArg "
-                          << this->buffers.size() - 1 << ": "
+                          << this->kernel_arg_idx << ": "
                           << buf
                           << std::endl;
             }
-            err = this->kernel.setArg(this->buffers.size() - 1, *buf);
+            err = this->kernel.setArg(this->kernel_arg_idx, *buf);
+            ++(this->kernel_arg_idx);
             check_err(err, "cl::Kernel::Kernel");
 
             if (ret == NULL)
                 return;
 
             *ret = buf;
+        }
+
+        template<typename T>
+        void set_buffer(const T &val)
+        {
+            cl_int err;
+
+            err = this->kernel.setArg(this->kernel_arg_idx, val);
+            ++(this->kernel_arg_idx);
+            check_err(err, "cl::Kernel::Kernel");
+
+            if (DEBUG)
+            {
+                std::cout << "[DEBUG] cl::Kernel::setArg "
+                          << this->kernel_arg_idx << ": "
+                          << "const setted"
+                          << std::endl;
+            }
         }
 
         void set_ret_buffer(void *buffs, const size_t size)
@@ -351,6 +371,7 @@ class Compute
         {
             cl_int err;
             this->kernel = cl::Kernel::Kernel(program, this->kernel_name.c_str(), &err);
+            this->kernel_arg_idx = 0;
 
             check_err(err, "cl::Kernel::Kernel");
         }
