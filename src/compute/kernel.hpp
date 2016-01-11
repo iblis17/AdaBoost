@@ -82,7 +82,7 @@ kernel void WeakLearn(
                     error1 += nf_weight[j] * (nf[j] > theta1);
 
             /* if (error1 > 0.5) */
-                polarity1 = -1 & (error1 > 0.5);
+                polarity1 = select(1, -1, (error1 > 0.5));
                 error1 = select(error1, (1 - error1), (error1 > 0.5));
 
             /* if (error1 < error) */
