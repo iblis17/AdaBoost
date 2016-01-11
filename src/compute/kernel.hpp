@@ -46,18 +46,18 @@ kernel void WeakLearn(
         float polarity = 1;
 
         // find the max/min from (pf + nf)
-        for (int i=1; i<pf_col; ++i)
+        for (private int i=1; i<pf_col; ++i)
         {
             max_ = max(max_, pf[i]);
             min_ = min(min_, pf[i]);
         }
-        for (int i=0; i<nf_col; ++i)
+        for (private int i=0; i<nf_col; ++i)
         {
             max_ = max(max_, nf[i]);
             min_ = min(min_, nf[i]);
         }
 
-        for (int i=1; i<slice; ++i)
+        for (private int i=1; i<slice; ++i)
         {
             float theta1 = (max_ - min_) * i / (slice - 1) + min_;
             float error1 = 0;
@@ -70,13 +70,11 @@ kernel void WeakLearn(
              *  polarity = -1 <-|-> polarity = 1
              */
 
-            for (int j=0; j<pf_col; ++j)
-                if (*(pf + j) < theta1)
-                    error1 += pf_weight[j];
+            for (private int j=0; j<pf_col; ++j)
+                    error1 += pf_weight[j] * (pf[j] < theta1);
 
-            for (int j=0; j<nf_col; ++j)
-                if (*(nf + j) > theta1)
-                    error1 += nf_weight[j];
+            for (private int j=0; j<nf_col; ++j)
+                    error1 += nf_weight[j] * (nf[j] > theta1);
 
             if (error1 > 0.5)
             {
