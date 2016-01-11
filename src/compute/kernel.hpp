@@ -25,11 +25,10 @@ kernel void WeakLearn(
      *      feature_size x 3 (error, polarity, theta)
      * */
     const int row_start = get_global_id(0) * group_size;
+    const int row_end = row_start + group_size;
 
     const int pf_col = *(pf_shape + 1);
     const int nf_col = *(nf_shape + 1);
-
-    const int row_end = row_start + group_size;
 
     for(int row=row_start; row<row_end; ++row)
     {
@@ -76,18 +75,15 @@ kernel void WeakLearn(
             for (private int j=0; j<nf_col; ++j)
                     error1 += nf_weight[j] * (nf[j] > theta1);
 
-            if (error1 > 0.5)
-            {
-                polarity1 = -1;
-                error1 = 1 - error1;
-            }
+            /* if (error1 > 0.5) */
+                polarity1 = -1 & (error1 > 0.5);
+                error1 = select(error1, (1 - error1), (error1 > 0.5));
 
-            if (error1 < error)
-            {
-                error = error1;
-                polarity = polarity1;
-                theta = theta1;
-            }
+            /* if (error1 < error) */
+                private int cmp = isless(error1, error);
+                error = select(error, error1, cmp);
+                polarity = select(polarity, polarity1, cmp);
+                theta = select(theta, theta1, cmp);
         }
 
         // return
