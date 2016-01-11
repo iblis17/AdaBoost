@@ -201,7 +201,7 @@ class Compute
              *
              * The size of `buffs` should be same as this->buffers[index].
              * */
-            assert(index < this->buffers.size());
+            assert(index < this->kernel_arg_idx);
             assert(this->buffers[index] != NULL);
 
             size_t size;
@@ -232,7 +232,7 @@ class Compute
 
         void release_buffer(const size_t index)
         {
-            assert(index < this->buffers.size());
+            assert(index < this->kernel_arg_idx);
 
             delete this->buffers[index];
             this->buffers[index] = NULL;
