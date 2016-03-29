@@ -1,19 +1,21 @@
-CC = clang++
-CFLAGS = -std=c++11 -lOpenCL -g -Wall -DDEBUG -I/usr/local/include/
+include user.mk
 
-BUILDDIR = build
+CC ?= clang++
+CFLAGS += -std=c++11 -lOpenCL -Wall -I/usr/local/include/
+
+BUILDDIR ?= ./build
 
 all: build_dir Add WeakLeaner
 
 build_dir:
-	mkdir -p ./build
+	mkdir -p ${BUILDDIR}
 
 %: %.cpp
 	$(CC) $(CFLAGS) -o $(BUILDDIR)/$@ $<
 
 clean:
 	rm -fv *.o
-	rm -fv build/*
+	rm -fv ${BUILDDIR}/*
 
 test-add:
 	$(BUILDDIR)/Add
