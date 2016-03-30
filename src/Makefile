@@ -1,6 +1,5 @@
 include user.mk
 
-CC ?= clang++
 CFLAGS += -std=c++11 -lOpenCL -Wall -I/usr/local/include/
 
 BUILDDIR ?= ./build
@@ -11,7 +10,7 @@ build_dir:
 	mkdir -p ${BUILDDIR}
 
 %: %.cpp
-	$(CC) $(CFLAGS) -o $(BUILDDIR)/$@ $<
+	$(CXX) $(CFLAGS) -o $(BUILDDIR)/$@ $<
 
 clean:
 	rm -fv *.o
