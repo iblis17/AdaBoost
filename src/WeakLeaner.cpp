@@ -3,6 +3,12 @@
 
 #include "compute/compute.hpp"
 
+#ifdef GPU
+    #define DEV_TYPE CL_DEVICE_TYPE_GPU
+#else
+    #define DEV_TYPE CL_DEVICE_TYPE_CPU
+#endif
+
 
 int main()
 {
@@ -27,7 +33,7 @@ int main()
     int group_size = 2;
     float ret[2][3];
 
-    Compute c("WeakLearn", CL_DEVICE_TYPE_CPU);
+    Compute c("WeakLearn", DEV_TYPE);
 
     c.set_buffer((float *)pf, 2 * 4 * sizeof(float));
     c.set_buffer((float *)nf, 2 * 6 * sizeof(float));

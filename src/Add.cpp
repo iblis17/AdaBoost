@@ -3,13 +3,18 @@
 
 #include "compute/compute.hpp"
 
+#ifdef GPU
+    #define DEV_TYPE CL_DEVICE_TYPE_GPU
+#else
+    #define DEV_TYPE CL_DEVICE_TYPE_CPU
+#endif
 
 int main()
 {
 	float test[4] = {1, 2, 3, 4};
 	float test2[4] = {5, 6, 7, 8};
 	float ret[4];
-	Compute c("add", CL_DEVICE_TYPE_CPU);
+	Compute c("add", DEV_TYPE);
 
 	c.set_buffer(test, 4 * sizeof(float));
 	c.set_buffer(test2, 4 * sizeof(float));
