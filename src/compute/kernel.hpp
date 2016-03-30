@@ -13,13 +13,13 @@ kernel void add(global float *a, global float *b, global float *ret)
 
 
 kernel void WeakLearn(
-    global read_only float *pf_maxtrix, global read_only float *nf_maxtrix,
+    global read_only float *pf_matrix, global read_only float *nf_matrix,
     global read_only float *pf_weight,  global read_only float *nf_weight,
     global read_only int *pf_shape,     global read_only int *nf_shape,
            read_only int group_size,    global write_only float *ret_matrix)
 {
     /*
-     * :param pf_maxtrix:
+     * :param pf_matrix:
      *         float matrix, feature_size x sample_size
      * :param ret_matrix:
      *      feature_size x 3 (error, polarity, theta)
