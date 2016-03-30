@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 
+from itertools import combinations
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def get_quartile(p_data: np.array, n_data: np.array, feature_size):
         series = np.concatenate((p_data[f_n], n_data[f_n]))
         series.sort()
 
-        print('feature {} series:'.format(f_n), series)
+        print('feature {} series:\n'.format(f_n), series)
 
         ret[f_n] = tuple(series[int(i)] if i.is_integer()
                          else (series[int(i)] + series[int(i)+1]) / 2
@@ -36,31 +37,89 @@ def get_quartile(p_data: np.array, n_data: np.array, feature_size):
     return ret
 
 
-def vote(p_series, n_series, p_weight, n_weight, q_series):
+def vote(px_series, py_series,
+         nx_series, ny_series,
+         p_weight,  n_weight,
+         qx_series, qy_series):
     '''
-    :param p_series: 1 dimension array of positive data
-    :param n_series: 1 dimension array of negative data
+    :param px_series: 1 dimension array of positive data
+    :param py_series: 1 dimension array of positive data
+    :param nx_series: 1 dimension array of negative data
+    :param ny_series: 1 dimension array of negative data
     :param p_weight: 1 dimension array of positive weight
     :param n_weight: 1 dimension array of negative weight
-    :param q_series: 1 dimension array of quartile
+    :param qx_series: 1 dimension array of x axis quartile
+    :param qy_series: 1 dimension array of y axis quartile
     '''
     ret_map = np.zeros((4, 4))
-    a
+
+    def get_idx(series, q_series):
+        series = series.copy()
+        for i in range(len(series)):
+            if series[i] < q_series[0]:
+                series[i] = 0
+            elif series[i] < q_series[1]:
+                series[i] = 1
+            elif series[i] < qx_series[2]:
+                series[i] = 2
+            else:
+                series[i] = 3
+        return series
+
+    px = get_idx(px_series, qx_series)
+    py = get_idx(py_series, qy_series)
+    nx = get_idx(nx_series, qx_series)
+    ny = get_idx(ny_series, qy_series)
+
+    for idx, _ in enumerate(px):
+        ret_map[px[idx], py[idx]] += p_weight[idx]
+    for idx, _ in enumerate(nx):
+        ret_map[nx[idx], ny[idx]] -= n_weight[idx]
+
+    print('voting map:\n', ret_map)
+    print(ret_map >= 0)
+
+    error = 0
+    error += ((ret_map < 0)[px, py] * p_weight).sum()
+    error += ((ret_map >= 0)[nx, ny] * n_weight).sum()
+    print('error:', error)
+
+    return ret_map >= 0, error
 
 
 def main():
     feature_size = 3
 
-    p_sample_size = 10
-    p_data = gen_data((feature_size, p_sample_size))
+    p_sample_size = 15
+    p_data = np.array(
+        [[1, 2, 7, 7, 7, 4, 5, 8, 6, 5, 9, 10, 3, 6, 8],
+         [7, 9, 3, 4, 6, 2, 2, 0, 1, 3, 4, 5, 7, 10, 2],
+         [3, 6, 6, 6, 2, 4, 3, 1, 5, 8, 9, 5, 7, 9, 3]])
 
-    n_sample_size = 13
-    n_data = gen_data((feature_size, n_sample_size))
+    n_sample_size = 14
+    n_data = np.array(
+        [[9, 1, 3, 4, 6, 2, 2, 2, 2, 7, 0, 8, 1, 3],
+         [7, 7, 4, 6, 3, 5, 6, 3, 2, 8, 9, 3, 1, 2],
+         [8, 5, 0, 10, 10, 2, 4, 1, 3, 5, 7, 2, 0, 9]]
+    )
+
+    total_sn = p_sample_size + n_sample_size
+
+    pw = np.zeros(p_sample_size) + (1 / total_sn)
+    nw = np.zeros(n_sample_size) + (1 / total_sn)
+
+    q_map = get_quartile(p_data, n_data, feature_size)
 
     print('positive data:\n', p_data)
     print('negative data:\n', n_data)
 
-    q_map = get_quartile(p_data, n_data, feature_size)
+    for i, j in combinations(range(feature_size), 2):
+        print(i, j)
+        vote_map, err = vote(
+            p_data[i], p_data[j],
+            n_data[i], n_data[j],
+            pw, nw,
+            q_map[i], q_map[j])
 
 
 if __name__ == '__main__':
