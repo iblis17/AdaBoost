@@ -32,8 +32,8 @@ kernel void WeakLearn(
 
     for(int row=row_start; row<row_end; ++row)
     {
-        global float *pf = pf_maxtrix + row * pf_col;
-        global float *nf = nf_maxtrix + row * nf_col;
+        global float *pf = pf_matrix + row * pf_col;
+        global float *nf = nf_matrix + row * nf_col;
         global float *ret = ret_matrix + row * 3;
 
         float max_ = *pf;
@@ -97,6 +97,83 @@ kernel void WeakLearn(
         ret[1] = polarity;
         ret[2] = theta;
     }
+}
+
+
+kernel void JointLearn(
+    global read_only float *pf_matrix, global read_only float *nf_matrix,
+    global read_only float *pw,        global read_only float *nw,
+           read_only int fn,                  read_only int pf_sn,
+           read_only int nf_sn,        global read_only int *clist,
+    global read_only float *q_map,     global write_only float *ret_matrix)
+{
+    /*
+     * :param pf_matrix:
+     *      float matrix, feature_size x sample_size
+     * :param ret_matrix:
+     *      feature_size x 3 (error, polarity, theta)
+     * :param pw: positive data weight
+     * :param nw: negative data weight
+     * :param fn: feature size
+     * :param pf_sn: positive smaple size
+     * :param nf_sn: negative sample size
+     * :param clist: combination list
+     *      matrix; shape = C(n, 2) x 2
+     *      e.g.
+     *      {
+     *          {1, 2},
+     *          {1, 3},
+     *          ...
+     *      }
+     * :param ret_matrix:
+     *      1-D array of errors, len = C(n, 2)
+     * :param q_map:
+     *      2-D array of quartile
+     *      e.g.
+     *         Q1, Q2, Q3
+     *      f1
+     *      f2
+     *      ..
+     *      fn
+     * */
+    const int idx = get_global_id(0);
+    const int cn2 = (fn * (fn - 1)) / 2;
+    const int total_sn = pf_sn + nf_sn;
+
+    const int ftr_x_idx = clist[idx + 0];  // index of feature x
+    const int ftr_y_idx = clist[idx + 1];  // index of feature y
+
+    global read_only float *pf_x = pf_matrix + (ftr_x_idx * pf_sn);
+    global read_only float *pf_y = pf_matrix + (ftr_y_idx * pf_sn);
+    global read_only float *nf_x = nf_matrix + (ftr_x_idx * nf_sn);
+    global read_only float *nf_y = nf_matrix + (ftr_y_idx * nf_sn);
+
+    private float vote_map[4][4] = {};  // init with all zeros
+    /* private read_only float */
+    /*     x_q1 = q_map[ftr_x_idx + 0], */
+    /*     x_q2 = q_map[ftr_x_idx + 1], */
+    /*     x_q3 = q_map[ftr_x_idx + 2], */
+    /*     y_q1 = q_map[ftr_y_idx + 0], */
+    /*     y_q2 = q_map[ftr_y_idx + 1], */
+    /*     y_q3 = q_map[ftr_y_idx + 2]; */
+
+    global read_only float *ret = ret_matrix + idx;
+
+    /* voting */
+    for (size_t i=0; i<pf_sn; i++)
+        vote_map[(int)pf_x[i]][(int)pf_y[i]] += pw[i];
+    for (size_t i=0; i<nf_sn; ++i)
+        vote_map[(int)nf_x[i]][(int)nf_y[i]] -= nw[i];
+
+    /* calculate error, place it into ret_matrix */
+    *ret = 0;
+    for (size_t i=0; i<pf_sn; ++i)
+        if (vote_map[(int)pf_x[i]][(int)pf_y[i]] < 0)
+            *ret += pw[i];
+
+    for (size_t i=0; i<nf_sn; ++i)
+        if (vote_map[(int)nf_x[i]][(int)nf_y[i]] >= 0)
+            *ret += nw[i];
 }
 )";
 
