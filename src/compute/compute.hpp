@@ -316,7 +316,7 @@ class Compute
         {
             cl_int err;
 
-            this->context = cl::Context::Context(devices,
+            this->context = cl::Context(devices,
                 NULL,  // property
                 NULL,  // call back
                 NULL,  // user_data
@@ -328,7 +328,7 @@ class Compute
         void init_program()
         {
             cl_int err;
-            this->program = cl::Program::Program(
+            this->program = cl::Program(
                 context,
                 this->kernel_src,
                 true,  // build
@@ -370,7 +370,7 @@ class Compute
         void init_kernel()
         {
             cl_int err;
-            this->kernel = cl::Kernel::Kernel(program, this->kernel_name.c_str(), &err);
+            this->kernel = cl::Kernel(program, this->kernel_name.c_str(), &err);
             this->kernel_arg_idx = 0;
 
             check_err(err, "cl::Kernel::Kernel");
@@ -379,7 +379,7 @@ class Compute
         void init_command_queue()
         {
             cl_int err;
-            this->command_queue = cl::CommandQueue::CommandQueue(
+            this->command_queue = cl::CommandQueue(
                 this->context,
                 0,  // property
                 &err);
