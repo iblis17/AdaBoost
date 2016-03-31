@@ -12,7 +12,7 @@ def gen_data(size=(3, 10)):
 
 def get_quartile(p_data: np.array, n_data: np.array, feature_size):
     ret = np.zeros((feature_size, 3))
-    serise_size = len(p_data[0]) + len(n_data[0])
+    serise_size = len(p_data[0]) + len(n_data[0]) + 1
     # quartile index: Q1, Q2, Q3
     q_idx = np.array((serise_size / 4,
                       serise_size / 2,
@@ -70,11 +70,19 @@ def vote(px_series, py_series,
     py = get_idx(py_series, qy_series)
     nx = get_idx(nx_series, qx_series)
     ny = get_idx(ny_series, qy_series)
+    print(px)
+    print(py)
+    print(nx)
+    print(ny)
 
     for idx, _ in enumerate(px):
         ret_map[px[idx], py[idx]] += p_weight[idx]
+        if px[idx] == 1 and py[idx] == 3:
+            print('!!\n', ret_map)
     for idx, _ in enumerate(nx):
         ret_map[nx[idx], ny[idx]] -= n_weight[idx]
+        if px[idx] == 1 and py[idx] == 3:
+            print('!!\n', ret_map)
 
     print('voting map:\n', ret_map)
     print(ret_map >= 0)
@@ -102,6 +110,11 @@ def main():
          [7, 7, 4, 6, 3, 5, 6, 3, 2, 8, 9, 3, 1, 2],
          [8, 5, 0, 10, 10, 2, 4, 1, 3, 5, 7, 2, 0, 9]]
     )
+
+    t = np.concatenate((p_data[1], n_data[1]))
+    t.sort()
+    print(t)
+    print(np.percentile(t, 75))
 
     total_sn = p_sample_size + n_sample_size
 
