@@ -19,15 +19,15 @@ clean:
 	rm -fv ${BUILDDIR}/*
 
 .PHONY: test-add
-test-add:
+test-add: Add
 	$(BUILDDIR)/Add
 
 .PHONY: test-weakleaner
-test-weakleaner:
+test-weakleaner: WeakLeaner
 	$(BUILDDIR)/WeakLeaner
 
 .PHONY: test-jointleaner
-test-jointleaner:
+test-jointleaner: JointLeaner
 	$(BUILDDIR)/JointLeaner
 
 .PHONY: test
