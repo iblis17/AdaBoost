@@ -14,9 +14,9 @@ kernel void add(global float *a, global float *b, global float *ret)
 
 kernel void WeakLearn(
     global read_only float *pf_matrix, global read_only float *nf_matrix,
-    global read_only float *pf_weight,  global read_only float *nf_weight,
-    global read_only int *pf_shape,     global read_only int *nf_shape,
-           read_only int group_size,    global write_only float *ret_matrix)
+    global read_only float *pf_weight, global read_only float *nf_weight,
+    global read_only int *pf_shape,    global read_only int *nf_shape,
+           read_only int group_size,   global write_only float *ret_matrix)
 {
     /*
      * :param pf_matrix:
@@ -140,8 +140,8 @@ kernel void JointLearn(
     const int cn2 = (fn * (fn - 1)) / 2;
     const int total_sn = pf_sn + nf_sn;
 
-    const int ftr_x_idx = clist[idx + 0];  // index of feature x
-    const int ftr_y_idx = clist[idx + 1];  // index of feature y
+    const int ftr_x_idx = clist[idx * 2 + 0];  // index of feature x
+    const int ftr_y_idx = clist[idx * 2 + 1];  // index of feature y
 
     global read_only float *pf_x = pf_matrix + (ftr_x_idx * pf_sn);
     global read_only float *pf_y = pf_matrix + (ftr_y_idx * pf_sn);
@@ -149,13 +149,6 @@ kernel void JointLearn(
     global read_only float *nf_y = nf_matrix + (ftr_y_idx * nf_sn);
 
     private float vote_map[4][4] = {};  // init with all zeros
-    /* private read_only float */
-    /*     x_q1 = q_map[ftr_x_idx + 0], */
-    /*     x_q2 = q_map[ftr_x_idx + 1], */
-    /*     x_q3 = q_map[ftr_x_idx + 2], */
-    /*     y_q1 = q_map[ftr_y_idx + 0], */
-    /*     y_q2 = q_map[ftr_y_idx + 1], */
-    /*     y_q3 = q_map[ftr_y_idx + 2]; */
 
     global read_only float *ret = ret_matrix + idx;
 
