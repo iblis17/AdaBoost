@@ -161,12 +161,10 @@ kernel void JointLearn(
     /* calculate error, place it into ret_matrix */
     *ret = 0;
     for (size_t i=0; i<pf_sn; ++i)
-        if (vote_map[(int)pf_x[i]][(int)pf_y[i]] < 0)
-            *ret += pw[i];
+        *ret += pw[i] * (vote_map[(int)pf_x[i]][(int)pf_y[i]] < 0);
 
     for (size_t i=0; i<nf_sn; ++i)
-        if (vote_map[(int)nf_x[i]][(int)nf_y[i]] >= 0)
-            *ret += nw[i];
+        *ret += nw[i] * (vote_map[(int)nf_x[i]][(int)nf_y[i]] >= 0);
 }
 )";
 
