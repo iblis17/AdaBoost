@@ -60,7 +60,7 @@ def vote(px_series, py_series,
                 series[i] = 0
             elif series[i] < q_series[1]:
                 series[i] = 1
-            elif series[i] < qx_series[2]:
+            elif series[i] < q_series[2]:
                 series[i] = 2
             else:
                 series[i] = 3
