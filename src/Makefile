@@ -27,7 +27,7 @@ test-weakleaner:
 	$(BUILDDIR)/WeakLeaner
 
 .PHONY: test-jointleaner
-test-joinleaner:
+test-jointleaner:
 	$(BUILDDIR)/JointLeaner
 
 .PHONY: test

@@ -77,12 +77,8 @@ def vote(px_series, py_series,
 
     for idx, _ in enumerate(px):
         ret_map[px[idx], py[idx]] += p_weight[idx]
-        if px[idx] == 1 and py[idx] == 3:
-            print('!!\n', ret_map)
     for idx, _ in enumerate(nx):
         ret_map[nx[idx], ny[idx]] -= n_weight[idx]
-        if px[idx] == 1 and py[idx] == 3:
-            print('!!\n', ret_map)
 
     print('voting map:\n', ret_map)
     print(ret_map >= 0)
