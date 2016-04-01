@@ -1,6 +1,9 @@
-#include <cstdio>
-#include <iostream>
 #include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <limits>
+#include <iostream>
 
 #include "compute/compute.hpp"
 
@@ -9,6 +12,14 @@
 #else
     #define DEV_TYPE CL_DEVICE_TYPE_CPU
 #endif
+
+template <typename T, const size_t row, const size_t col>
+void assert_2d_arr(T (&arr)[row][col],
+                   T (&exp_arr)[row][col],
+                   std::string msg);
+
+template <typename T>
+void assert_float(const T &f1, const T &f2);
 
 int main()
 {
@@ -103,6 +114,25 @@ int main()
         }
 	}
 
+    /* assertion */
+    float exp_q_map[fn][3] = {
+        {2, 5, 7},
+        {2, 4, 7},
+        {2.5, 5, 7.5}
+    };
+    assert_2d_arr(q_map, exp_q_map, "q_map");
+
+    float expect_pf[fn][pf_sn] = {
+        {0, 1, 3, 3, 3, 1, 2, 3, 2, 2, 3, 3, 1, 2, 3},
+        {3, 3, 1, 2, 2, 1, 1, 0, 0, 1, 2, 2, 3, 3, 1},
+        {1, 2, 2, 2, 0, 1, 1, 0, 2, 3, 3, 2, 2, 3, 1}};
+    assert_2d_arr(pf, expect_pf, "pf");
+
+    float expect_nf[fn][nf_sn] = {
+        {3, 0, 1, 1, 2, 1, 1, 1, 1, 3, 0, 3, 0, 1},
+        {3, 3, 2, 2, 1, 2, 2, 1, 1, 3, 3, 1, 0, 1},
+        {3, 2, 0, 3, 3, 0, 1, 0, 1, 2, 2, 0, 0, 3}};
+    assert_2d_arr(nf, expect_nf, "nf");
 
     /* opencl routine */
     Compute c("JointLearn", DEV_TYPE);
@@ -123,12 +153,47 @@ int main()
     c.set_ret_buffer((float *)ret, cn2 * sizeof(float));
 
     c.run(3);
+    /* end of opencl routine */
+
+    std::cout.precision(std::numeric_limits<float>::max_digits10);
 
     std::cout << ret[0] << std::endl;
+    assert_float(ret[0], (float)0.137931034);
+
     std::cout << ret[1] << std::endl;
+    assert_float(ret[1], (float)0.172413796);
+
     std::cout << ret[2] << std::endl;
+    assert_float(ret[2], (float)0.275862068);
 
     c.reset_buffer();  // obj `c` can reuse for next `set_buffer` and `run`
 
     return 0;
+}
+
+template <typename T, const size_t row, const size_t col>
+void assert_2d_arr(T (&arr)[row][col],
+                   T (&exp_arr)[row][col],
+                   std::string msg)
+{
+    std::cout << "[Assert] checking " << msg << " ...";
+    for (auto i=0; i<row; ++i)
+        for (auto j=0; j<col; ++j)
+            if (arr[i][j] != exp_arr[i][j])
+            {
+                printf("\n\tAssertionError: arr[%d][%d] != expect[%d][%d]\n\t",
+                       i, j, i, j);
+                std::cout << arr[i][j] << " != " << exp_arr[i][j] << std::endl;
+                throw;
+            }
+    std::cout << "done" << std::endl;
+}
+
+template <typename T>
+void assert_float(const T &f1, const T &f2)
+{
+    T epsilon = std::numeric_limits<T>::epsilon();
+
+    if (std::fabs(f1 - f2) >= epsilon)
+        throw "AssertionError";
 }
