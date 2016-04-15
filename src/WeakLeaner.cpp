@@ -31,7 +31,6 @@ int main()
     };
     int pf_shape[2] = { 2, 4 };
     int nf_shape[2] = { 2, 6 };
-    int group_size = 2;
     float ret[2][3];
 
     Compute c("WeakLearn", DEV_TYPE);
@@ -45,11 +44,9 @@ int main()
     c.set_buffer((int *)pf_shape, 2 * sizeof(int));
     c.set_buffer((int *)nf_shape, 2 * sizeof(int));
 
-    c.set_buffer(group_size);
-
     c.set_ret_buffer((float *)ret, 2 * 3 * sizeof(float));
 
-    c.run(1);
+    c.run(2);
 
     std::cout << ret[0][0] << std::endl;
     std::cout << ret[0][1] << std::endl;
