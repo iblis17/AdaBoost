@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "compute/compute.hpp"
+#include "utils.hpp"
 
 #ifdef GPU
     #define DEV_TYPE CL_DEVICE_TYPE_GPU
@@ -56,6 +57,13 @@ int main()
     std::cout << ret[1][0] << std::endl;
     std::cout << ret[1][1] << std::endl;
     std::cout << ret[1][2] << std::endl;
+
+    assert_float(ret[0][0], (float)0.3);
+    assert_float(ret[0][1], (float)-1.0);
+    assert_float(ret[0][2], (float)38.0);
+    assert_float(ret[1][0], (float)0.4);
+    assert_float(ret[1][1], (float)-1.0);
+    assert_float(ret[1][2], (float)19.88888889);
 
     c.reset_buffer();  // obj `c` can reuse for next `set_buffer` and `run`
 }
