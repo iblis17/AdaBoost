@@ -17,9 +17,9 @@
 
 int main()
 {
-	const int fn = 3;		// feature number
-	const int pf_sn = 15;	// positive sample size
-	const int nf_sn = 14;	// negative sample size
+    const int fn = 3;		// feature number
+    const int pf_sn = 15;	// positive sample size
+    const int nf_sn = 14;	// negative sample size
     const int total_sn = pf_sn + nf_sn;
     const int cn2 = fn * (fn - 1) / 2;
 
